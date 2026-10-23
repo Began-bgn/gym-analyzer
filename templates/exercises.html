@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block content %}
+<h1>Exercises</h1>
+{% if error %}
+<p style="color: red">{{ error }}</p>
+{% endif %}
+<form method="post">
+  <input name="name" placeholder="Name" required />
+  <input name="muscle_group" placeholder="Muscle group" required />
+  <button type="submit">Add</button>
+</form>
+<ul>
+  {% for e in exercises %}
+  <li>{{ e["exercise_name"] }} ({{ e["muscle_group"] }})</li>
+  {% endfor %}
+</ul>
+{% endblock %}

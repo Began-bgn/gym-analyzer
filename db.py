@@ -60,5 +60,28 @@ def list_workouts():
     finally:
         conn.close()
 
+def get_workout(workout_id):
+    conn = get_connection()
+    try:
+        return conn.execute(
+            "SELECT workout_id, workout_date, notes FROM workouts WHERE workout_id = ?",
+            (workout_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+def list_sets_for_workout(workout_id):
+    conn = get_connection()
+    try:
+        return conn.execute(
+            "SELECT e.exercise_name, s.set_nr, s.reps, s.weight "
+            "FROM sets s JOIN exercises e ON e.exercise_id = s.exercise_id "
+            "WHERE s.workout_id = ? "
+            "ORDER BY e.exercise_name, s.set_nr",
+            (workout_id,),
+        ).fetchall()
+    finally:
+        conn.close()
+
 
         

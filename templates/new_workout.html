@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Log Workout</h1>
+{% if error %}<p style="color: red;">{{ error }}</p>{% endif %}
+{% if not exercises %}<p>Add an exercise first.</p>{% endif %}
+<form method="post">
+    <p><label>Date <input type="date" name="workout_date" value="{{ form.get('workout_date', '') }}" required></label></p>
+    <p><label>Notes <input name="notes" value="{{ form.get('notes', '') }}"></label></p>
+    <table>
+        <tr><th>Exercise</th><th>Reps</th><th>Weight (kg)</th></tr>
+        {% for i in rows %}
+        <tr>
+          <td>
+            <select name="exercise_{{ i }}">
+              <option value="">-</option>
+              {% for e in exercises %}
+              <option value="{{ e['exercise_id'] }}"
+                {% if form.get('exercise_' ~ i) == e['exercise_id']|string %}selected{% endif %}>
+                {{ e["exercise_name"] }}
+              </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input name="reps_{{ i }}" value="{{ form.get('reps_' ~ i, '') }}"></td>
+          <td><input name="weight_{{ i }}" value="{{ form.get('weight_' ~ i, '') }}"></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button type="submit">Save workout</button>
+</form>
+{% endblock %}

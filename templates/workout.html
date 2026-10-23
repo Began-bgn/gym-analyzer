@@ -1,0 +1,20 @@
+{% extends "base.html" %} {% block content %}
+<h1>{{ workout["workout_date"] }}</h1>
+<p>{{ workout["notes"] or "" }}</p>
+<table>
+  <tr>
+    <th>Exercise</th>
+    <th>Set</th>
+    <th>Reps</th>
+    <th>Weight (kg)</th>
+  </tr>
+  {% for s in sets %}
+  <tr>
+    <td>{{ s["exercise_name"] }}</td>
+    <td>{{ s["set_nr"] }}</td>
+    <td>{{ s["reps"] }}</td>
+    <td>{{ s["weight"] }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

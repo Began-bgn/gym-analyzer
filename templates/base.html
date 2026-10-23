@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gym Analyzer</title>
+  </head>
+  <body>
+    <nav>
+      <a href="{{ url_for('workouts') }}">Workouts</a> |
+      <a href="{{ url_for('exercises') }}">Exercises</a>
+      | <a href="{{ url_for('new_workout') }}">Log workout</a>
+    </nav>
+    <hr />
+    {% block content %}{% endblock %}
+  </body>
+</html>
