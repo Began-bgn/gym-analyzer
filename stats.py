@@ -70,3 +70,15 @@ def personal_records(conn, week_start):
         "ORDER BY exercise_name",
         (week_start,),
     ).fetchall()
+
+def volume_by_muscle_group(conn, week_start):
+    return conn.execute(
+        "SELECT e.muscle_group, SUM(s.reps * s.weight) AS volume "
+        "FROM workouts w "
+        "JOIN sets s ON s.workout_id = w.workout_id "
+        "JOIN exercises e ON e.exercise_id = s.exercise_id "
+        "WHERE date(w.workout_date, '-6 days', 'weekday 1') = ? "
+        "GROUP BY e.muscle_group "
+        "ORDER BY volume DESC",
+        (week_start,),
+    ).fetchall()

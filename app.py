@@ -3,6 +3,8 @@ import sqlite3
 from datetime import datetime
 from flask import Flask, abort, redirect, render_template, request, url_for
 import db
+import review
+from datetime import datetime, timedelta
 
 ROWS = 5
 
@@ -95,3 +97,24 @@ def workout(workout_id):
         abort(404)
     return render_template("workout.html", workout=w,
                            sets=db.list_sets_for_workout(workout_id))
+
+@app.route("/reviews", methods=["GET", "POST"])
+def reviews():
+    error = None
+    conn = db.get_connection()
+    try:
+        if request.method == "POST":
+            try:
+                day = datetime.strptime(request.form.get("week_start", ""), "%Y-%m-%d")
+            except ValueError:
+                error = "Pick a valid date."
+            else:
+                monday = (day - timedelta(days=day.weekday())).strftime("%Y-%m-%d")
+                try:
+                    review.generate_review(conn, review.make_client(), monday)
+                except review.ReviewError as e:
+                    error = str(e)
+        all_reviews = review.list_reviews(conn)
+    finally:
+        conn.close()
+    return render_template("reviews.html", reviews=all_reviews, error=error)

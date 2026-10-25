@@ -8,7 +8,8 @@
     <nav>
       <a href="{{ url_for('workouts') }}">Workouts</a> |
       <a href="{{ url_for('exercises') }}">Exercises</a>
-      | <a href="{{ url_for('new_workout') }}">Log workout</a>
+      | <a href="{{ url_for('new_workout') }}">Log workout</a> |
+      <a href="{{ url_for('reviews') }}">Reviews</a>
     </nav>
     <hr />
     {% block content %}{% endblock %}
