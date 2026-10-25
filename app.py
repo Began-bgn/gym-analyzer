@@ -1,3 +1,5 @@
+import click
+from datetime import date, datetime, timedelta
 import math
 import sqlite3
 from datetime import datetime
@@ -118,3 +120,22 @@ def reviews():
     finally:
         conn.close()
     return render_template("reviews.html", reviews=all_reviews, error=error)
+
+def last_full_week_start(today=None):
+    today = today or date.today()
+    this_monday = today - timedelta(days=today.weekday())
+    return (this_monday - timedelta(days=7)).strftime("%Y-%m-%d")
+
+
+@app.cli.command("generate-review")
+def generate_review_command():
+    """Create (or reuse) the review for the last full week."""
+    week_start = last_full_week_start()
+    conn = db.get_connection()
+    try:
+        text = review.generate_review(conn, review.make_client(), week_start)
+    except review.ReviewError as e:
+        raise click.ClickException(str(e))
+    finally:
+        conn.close()
+    click.echo(f"Review for week of {week_start}:\n{text}")
