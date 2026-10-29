@@ -1,15 +1,15 @@
-{% extends "base.html" %} {% block content %}
-<h1>Weekly reviews</h1>
-{% if error %}
-<p><strong>{{ error }}</strong></p>
+{% extends "base.html" %} {% block content %} {% if error %}
+<p class="error">{{ error }}</p>
 {% endif %}
-<form method="post">
-  <label
-    >Any date in the week: <input type="date" name="week_start" required
+<form method="post" class="card row">
+  <label class="grow"
+    >Any date in the week <input type="date" name="week_start" required
   /></label>
-  <button type="submit">Generate review</button>
+  <button type="submit" class="primary">Generate review</button>
 </form>
 {% for r in reviews %}
-<h2>Week of {{ r.weekly_start_date }}</h2>
-<p style="white-space: pre-wrap">{{ r.review }}</p>
+<section class="card">
+  <h2>Week of {{ r.weekly_start_date }}</h2>
+  <p class="review">{{ r.review }}</p>
+</section>
 {% endfor %} {% endblock %}

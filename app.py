@@ -2,13 +2,10 @@ import click
 from datetime import date, datetime, timedelta
 import math
 import sqlite3
-from datetime import datetime
 from flask import Flask, abort, redirect, render_template, request, url_for
 import db
 import review
-from datetime import datetime, timedelta
 
-ROWS = 5
 
 app = Flask(__name__)
 
@@ -36,6 +33,18 @@ def exercises():
                 error = "That exercise already exists."
     return render_template("exercises.html", exercises = db.list_exercises(), error = error)
 
+def blocks_from_form(form):
+    """Group posted fields into [{"exercise": id, "sets": [(reps, weight), ...]}] in page order."""
+    ids = sorted(int(k[9:]) for k in form if k.startswith("exercise_") and k[9:].isdigit())
+    return [
+        {
+            "exercise": form.get(f"exercise_{i}", ""),
+            "sets": list(zip(form.getlist(f"reps_{i}"), form.getlist(f"weight_{i}"))),
+        }
+        for i in ids
+    ]
+
+
 def parse_workout(form, valid_ids):
     workout_date = form.get("workout_date", "")
     try:
@@ -48,30 +57,32 @@ def parse_workout(form, valid_ids):
     notes = form.get("notes", "").strip()
     sets = []
     counts = {}
-    for i in range(ROWS):
-        exercise = form.get(f"exercise_{i}", "")
-        reps = form.get(f"reps_{i}", "").strip()
-        weight = form.get(f"weight_{i}", "").strip()
-        if not exercise and not reps and not weight:
-            continue
-        if not exercise or not reps or not weight:
-            raise ValueError(f"Row {i + 1}: fill in exercise, reps and weight.")
+    for n, block in enumerate(blocks_from_form(form), start=1):
         try:
-            exercise_id = int(exercise)
-            reps = int(reps)
-            weight = float(weight)
+            exercise_id = int(block["exercise"])
         except ValueError:
-            raise ValueError(f"Row {i + 1}: reps must be a whole number and weight a number.")
+            raise ValueError(f"Exercise {n}: pick an exercise.")
         if exercise_id not in valid_ids:
-            raise ValueError(f"Row {i + 1}: unknown exercise.")
-        if reps <= 0:
-            raise ValueError(f"Row {i + 1}: reps must be greater than 0.")
-        if not math.isfinite(weight) or weight < 0:
-            raise ValueError(f"Row {i + 1}: weight must be 0 or more.")
-        counts[exercise_id] = counts.get(exercise_id, 0) + 1
-        sets.append((exercise_id, counts[exercise_id], reps, weight))
+            raise ValueError(f"Exercise {n}: unknown exercise.")
+        if not block["sets"]:
+            raise ValueError(f"Exercise {n}: add at least one set.")
+        for s, (reps, weight) in enumerate(block["sets"], start=1):
+            label = f"Exercise {n}, set {s}"
+            if not reps.strip() or not weight.strip():
+                raise ValueError(f"{label}: fill in reps and weight.")
+            try:
+                reps = int(reps)
+                weight = float(weight)
+            except ValueError:
+                raise ValueError(f"{label}: reps must be a whole number and weight a number.")
+            if reps <= 0:
+                raise ValueError(f"{label}: reps must be greater than 0.")
+            if not math.isfinite(weight) or weight < 0:
+                raise ValueError(f"{label}: weight must be 0 or more.")
+            counts[exercise_id] = counts.get(exercise_id, 0) + 1
+            sets.append((exercise_id, counts[exercise_id], reps, weight))
     if not sets:
-        raise ValueError("Add at least one set.")
+        raise ValueError("Add at least one exercise.")
     return workout_date, notes, sets
 
 
@@ -88,9 +99,9 @@ def new_workout():
         else:
             db.add_workout(workout_date, notes, sets)
             return redirect(url_for("workouts"))
+    blocks = blocks_from_form(request.form) or [{"exercise": "", "sets": [("", "")]}]
     return render_template("new_workout.html", exercises=exercise_list,
-                           error=error, rows=range(ROWS), form=request.form)
-
+                           error=error, blocks=blocks, form=request.form)
 
 @app.route("/workouts/<int:workout_id>")
 def workout(workout_id):

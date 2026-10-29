@@ -1,31 +1,81 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Log Workout</h1>
-{% if error %}<p style="color: red;">{{ error }}</p>{% endif %}
-{% if not exercises %}<p>Add an exercise first.</p>{% endif %}
+{% macro set_row(i, reps="", weight="") %}
+<div class="set-row">
+  <input name="reps_{{ i }}" type="number" min="1" step="1" placeholder="Reps" value="{{ reps }}" required>
+  <input name="weight_{{ i }}" type="number" min="0" step="any" placeholder="Weight (kg)" value="{{ weight }}" required>
+  <button type="button" class="ghost" data-remove-set title="Remove set">&times;</button>
+</div>
+{% endmacro %}
+
+{% macro exercise_block(i, exercise="", sets=[("", "")]) %}
+<section class="card block">
+  <div class="block-head">
+    <select name="exercise_{{ i }}" required>
+      <option value="">Choose exercise…</option>
+      {% for e in exercises %}
+      <option value="{{ e['exercise_id'] }}" {% if exercise == e['exercise_id']|string %}selected{% endif %}>
+        {{ e["exercise_name"]|title }}
+      </option>
+      {% endfor %}
+    </select>
+    <button type="button" class="ghost" data-remove-block>Remove exercise</button>
+  </div>
+  <div class="sets">
+    {% for reps, weight in sets %}{{ set_row(i, reps, weight) }}{% endfor %}
+  </div>
+  <button type="button" class="ghost" data-add-set>+ Add set</button>
+</section>
+{% endmacro %}
+
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+{% if not exercises %}<p class="error">Add an <a href="{{ url_for('exercises') }}">exercise</a> first.</p>{% endif %}
+
 <form method="post">
-    <p><label>Date <input type="date" name="workout_date" value="{{ form.get('workout_date', '') }}" required></label></p>
-    <p><label>Notes <input name="notes" value="{{ form.get('notes', '') }}"></label></p>
-    <table>
-        <tr><th>Exercise</th><th>Reps</th><th>Weight (kg)</th></tr>
-        {% for i in rows %}
-        <tr>
-          <td>
-            <select name="exercise_{{ i }}">
-              <option value="">-</option>
-              {% for e in exercises %}
-              <option value="{{ e['exercise_id'] }}"
-                {% if form.get('exercise_' ~ i) == e['exercise_id']|string %}selected{% endif %}>
-                {{ e["exercise_name"] }}
-              </option>
-              {% endfor %}
-            </select>
-          </td>
-          <td><input name="reps_{{ i }}" value="{{ form.get('reps_' ~ i, '') }}"></td>
-          <td><input name="weight_{{ i }}" value="{{ form.get('weight_' ~ i, '') }}"></td>
-        </tr>
-        {% endfor %}
-    </table>
-    <button type="submit">Save workout</button>
+  <div class="card row">
+    <label>Date <input type="date" name="workout_date" value="{{ form.get('workout_date', '') }}" required></label>
+    <label class="grow">Notes <input name="notes" value="{{ form.get('notes', '') }}"></label>
+  </div>
+
+  <div id="blocks">
+    {% for b in blocks %}{{ exercise_block(loop.index0, b.exercise, b.sets) }}{% endfor %}
+  </div>
+
+  <p class="row">
+    <button type="button" class="ghost" id="add-block">+ Add exercise</button>
+    <button type="submit" class="primary">Save workout</button>
+  </p>
 </form>
+
+<template id="block-tpl">{{ exercise_block("__N__") }}</template>
+<template id="set-tpl">{{ set_row("__N__") }}</template>
+
+<script>
+  const blocks = document.getElementById("blocks");
+  let next = {{ blocks|length }};
+  const tpl = (id, n) => document.getElementById(id).innerHTML.replaceAll("__N__", n);
+
+  document.getElementById("add-block").onclick = () =>
+    blocks.insertAdjacentHTML("beforeend", tpl("block-tpl", next++));
+
+  blocks.addEventListener("click", (e) => {
+    const block = e.target.closest(".block");
+    if (e.target.matches("[data-add-set]")) {
+      const sets = block.querySelector(".sets");
+      const last = sets.lastElementChild;
+      const n = block.querySelector("select").name.split("_")[1];
+      sets.insertAdjacentHTML("beforeend", tpl("set-tpl", n));
+      if (last) {  // new set starts as a copy of the previous one
+        sets.lastElementChild.querySelectorAll("input").forEach((inp, k) => {
+          inp.value = last.querySelectorAll("input")[k].value;
+        });
+      }
+    } else if (e.target.matches("[data-remove-set]")) {
+      const row = e.target.closest(".set-row");
+      if (row.parentElement.children.length > 1) row.remove();
+    } else if (e.target.matches("[data-remove-block]")) {
+      block.remove();
+    }
+  });
+</script>
 {% endblock %}

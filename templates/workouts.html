@@ -1,12 +1,17 @@
 {% extends "base.html" %} {% block content %}
-<h1>Workouts</h1>
-{% for w in workouts %}
-<p>
-  <a href="{{ url_for('workout', workout_id=w['workout_id']) }}">
-    {{ w["workout_date"] }}
-  </a>
-  {{ w["notes"] or "" }}
-</p>
-{% else %}
-<p>No workouts yet.</p>
-{% endfor %} {% endblock %}
+<ul class="list">
+  {% for w in workouts %}
+  <li>
+    <a href="{{ url_for('workout', workout_id=w['workout_id']) }}"
+      >{{ w["workout_date"] }}</a
+    >
+    <span class="muted">{{ w["notes"] or "" }}</span>
+  </li>
+  {% else %}
+  <li class="muted">
+    No workouts yet.
+    <a href="{{ url_for('new_workout') }}">Log your first one.</a>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

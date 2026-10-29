@@ -7,6 +7,9 @@ exercise_name TEXT NOT NULL UNIQUE,
 muscle_group TEXT NOT NULL
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_exercise_name_nocase
+ON exercises (exercise_name COLLATE NOCASE);
+
 CREATE TABLE workouts
 (
 workout_id INTEGER PRIMARY KEY,

@@ -1,16 +1,19 @@
-{% extends "base.html" %} {% block content %}
-<h1>Exercises</h1>
-{% if error %}
-<p style="color: red">{{ error }}</p>
+{% extends "base.html" %} {% block content %} {% if error %}
+<p class="error">{{ error }}</p>
 {% endif %}
-<form method="post">
-  <input name="name" placeholder="Name" required />
-  <input name="muscle_group" placeholder="Muscle group" required />
-  <button type="submit">Add</button>
+<form method="post" class="card row">
+  <label class="grow">Name <input name="name" required /></label>
+  <label class="grow"
+    >Muscle group <input name="muscle_group" required
+  /></label>
+  <button type="submit" class="primary">Add</button>
 </form>
-<ul>
+<ul class="list">
   {% for e in exercises %}
-  <li>{{ e["exercise_name"] }} ({{ e["muscle_group"] }})</li>
+  <li>
+    {{ e["exercise_name"]|title }}
+    <span class="muted">{{ e["muscle_group"]|title }}</span>
+  </li>
   {% endfor %}
 </ul>
 {% endblock %}

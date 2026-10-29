@@ -2,16 +2,41 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Gym Analyzer</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
   </head>
   <body>
-    <nav>
-      <a href="{{ url_for('workouts') }}">Workouts</a> |
-      <a href="{{ url_for('exercises') }}">Exercises</a>
-      | <a href="{{ url_for('new_workout') }}">Log workout</a> |
-      <a href="{{ url_for('reviews') }}">Reviews</a>
-    </nav>
-    <hr />
-    {% block content %}{% endblock %}
+    <header>
+      <div class="container bar">
+        <a class="brand" href="{{ url_for('workouts') }}">Gym Analyzer</a>
+        <nav>
+          <a
+            href="{{ url_for('workouts') }}"
+            class="{{ 'active' if request.endpoint in ('workouts', 'workout') }}"
+            >Workouts</a
+          >
+          <a
+            href="{{ url_for('exercises') }}"
+            class="{{ 'active' if request.endpoint == 'exercises' }}"
+            >Exercises</a
+          >
+          <a
+            href="{{ url_for('new_workout') }}"
+            class="{{ 'active' if request.endpoint == 'new_workout' }}"
+            >Log workout</a
+          >
+          <a
+            href="{{ url_for('reviews') }}"
+            class="{{ 'active' if request.endpoint == 'reviews' }}"
+            >Reviews</a
+          >
+        </nav>
+      </div>
+    </header>
+    <main class="container">{% block content %}{% endblock %}</main>
   </body>
 </html>

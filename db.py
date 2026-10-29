@@ -34,7 +34,7 @@ def add_exercise(name, muscle_group):
         with conn:
             cursor = conn.execute(
                         "INSERT INTO exercises (exercise_name, muscle_group) VALUES (?, ?)",
-                        (name, muscle_group),
+                        (name, muscle_group.lower()),
                     )
         return cursor.lastrowid    
     finally:

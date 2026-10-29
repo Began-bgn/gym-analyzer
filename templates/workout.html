@@ -1,6 +1,8 @@
 {% extends "base.html" %} {% block content %}
 <h1>{{ workout["workout_date"] }}</h1>
-<p>{{ workout["notes"] or "" }}</p>
+{% if workout["notes"] %}
+<p class="muted">{{ workout["notes"] }}</p>
+{% endif %}
 <table>
   <tr>
     <th>Exercise</th>
@@ -10,7 +12,7 @@
   </tr>
   {% for s in sets %}
   <tr>
-    <td>{{ s["exercise_name"] }}</td>
+    <td>{{ s["exercise_name"]|title }}</td>
     <td>{{ s["set_nr"] }}</td>
     <td>{{ s["reps"] }}</td>
     <td>{{ s["weight"] }}</td>
