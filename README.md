@@ -22,7 +22,7 @@ A web app where I log my workouts and get a weekly AI review of my sessions.
 ## Setup
 
 ```bash
-git clone <gym-analyzer> gym-analyzer
+git clone https://github.com/Began-bgn/gym-analyzer.git gym-analyzer
 cd gym-analyzer
 python3.12 -m venv venv
 source venv/bin/activate
